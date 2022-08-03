@@ -4,7 +4,7 @@
 import torch
 # Download an example image from the pytorch website
 url, filename = (
-    "https://github.com/bytecodealliance/wasi-nn/raw/main/rust/images/1.jpg", "input.jpg")
+    "https://github.com/bytecodealliance/wasi-nn/raw/main/rust/images/1.jpg", "../inputs/banana.jpg")
 # import urllib
 # try:
 #     urllib.URLopener().retrieve(url, filename)
@@ -12,7 +12,8 @@ url, filename = (
 #     urllib.request.urlretrieve(url, filename)
 
 # sample execution (requires torchvision)
-model = torch.hub.load('pytorch/vision:v0.10.0', 'mobilenet_v2', pretrained=True)
+model = torch.hub.load('pytorch/vision:v0.10.0',
+                       'mobilenet_v2', pretrained=True)
 model.eval()
 
 from PIL import Image
@@ -29,6 +30,7 @@ input_tensor = preprocess(input_image)
 print(input_tensor[:, 0, 0])
 # create a mini-batch as expected by the model
 input_batch = input_tensor.unsqueeze(0)
+torch.save(input_batch, "input_image.pt")
 
 # move the input and model to GPU for speed if available
 if torch.cuda.is_available():
@@ -46,6 +48,5 @@ with open("imagenet_classes.txt", "r") as f:
     categories = [s.strip() for s in f.readlines()]
 # Show top categories per image
 top5_prob, top5_catid = torch.topk(probabilities, 5)
-print(output.shape)
 for i in range(top5_prob.size(0)):
     print(top5_catid[i], categories[top5_catid[i]], top5_prob[i].item())
