@@ -2,6 +2,7 @@
 # adapted from https://pytorch.org/hub/pytorch_vision_mobilenet_v2/
 
 import torch
+import struct
 # Download an example image from the pytorch website
 url, filename = (
     "https://github.com/bytecodealliance/wasi-nn/raw/main/rust/images/1.jpg", "../inputs/banana.jpg")
@@ -21,16 +22,20 @@ from torchvision import transforms
 input_image = Image.open(filename)
 print(input_image.mode)
 preprocess = transforms.Compose([
-    transforms.Resize(224),
+    transforms.Resize((224, 224)),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406],
                          std=[0.229, 0.224, 0.225]),
 ])
 input_tensor = preprocess(input_image)
-print(input_tensor[:, 0, 0])
 # create a mini-batch as expected by the model
 input_batch = input_tensor.unsqueeze(0)
-torch.save(input_batch, "input_image.pt")
+with open("image-1-3-244-244.rgb", 'wb') as f:
+    order_data = input_batch.reshape(-1)
+    for d in order_data:
+        d = d.item()
+        f.write(struct.pack('f', d))
+
 
 # move the input and model to GPU for speed if available
 if torch.cuda.is_available():
